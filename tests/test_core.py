@@ -10,7 +10,15 @@ from unittest import mock
 
 from gigabyte_kbd import config
 from gigabyte_kbd.device import LampArray, LampArrayInfo
-from gigabyte_kbd.effects import _linear_to_oklab, _oklab_to_linear, frame_rgb, period_seconds
+from gigabyte_kbd.effects import (
+    CORSAIR_RAINBOW_STOPS,
+    _gradient_rgb,
+    _linear_to_oklab,
+    _oklab_to_linear,
+    frame_rgb,
+    period_seconds,
+    rainbow_rgb,
+)
 
 
 class ColourTests(unittest.TestCase):
@@ -71,6 +79,17 @@ class EffectTests(unittest.TestCase):
                 frame = frame_rgb(effect, phase, base)
                 self.assertTrue(all(0 <= c <= 255 for c in frame), (effect, phase, frame))
         self.assertEqual(frame_rgb("wave", 0.0, base), config.PALETTE_RGB[0])
+
+    def test_corsair_rainbow_stops(self) -> None:
+        for position, colour in CORSAIR_RAINBOW_STOPS:
+            self.assertEqual(_gradient_rgb(CORSAIR_RAINBOW_STOPS, position), colour)
+        self.assertEqual(rainbow_rgb(0.0), (255, 0, 0))
+        self.assertEqual(rainbow_rgb(0.17), (255, 255, 0))
+        self.assertEqual(rainbow_rgb(0.33), (0, 255, 0))
+        self.assertEqual(rainbow_rgb(0.50), (0, 255, 255))
+        self.assertEqual(rainbow_rgb(0.67), (0, 0, 255))
+        self.assertEqual(rainbow_rgb(0.83), (255, 0, 255))
+        self.assertEqual(rainbow_rgb(0.25), (128, 255, 0))
 
     def test_oklab_roundtrip(self) -> None:
         for colour in ((0, 0, 0), (255, 255, 255), (249, 56, 44), (50, 173, 230)):

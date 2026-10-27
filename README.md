@@ -20,8 +20,7 @@ offers.
 - Any `#RRGGBB` colour (16.7 million choices), not a fixed palette
 - 0–100 % brightness (emulated by scaling RGB, because the firmware's
   intensity channel is on/off only)
-- Software animations: breathing, palette wave and a perceptually smooth
-  rainbow
+- Software animations: breathing, palette wave and a Corsair-style rainbow
 - GUI with colour picker, presets, brightness slider, effect controls and a
   system-tray icon
 - Scriptable CLI
@@ -153,9 +152,11 @@ colour. If you prefer a different colour at login, set it with
   equivalent: it sweeps smoothly through the palette in reading order (top row
   left to right, then bottom row left to right) on the single zone.
   Effects are whole-keyboard fades/cycles.
-- **Rainbow is perceptual.** It rotates hue in Oklch at constant lightness and
-  moderate chroma, instead of the HSV rainbow that produces harsh
-  green/yellow/blue peaks.
+- **Rainbow mirrors Corsair's.** It uses the CUE/ckb-next rainbow gradient:
+  full-saturation red → yellow → green → cyan → blue → magenta → red, with
+  stops at 0/17/33/50/67/83/100 % and linear interpolation between them. On a
+  single zone this appears as a smooth colour cycle, the same sequence a
+  Corsair keyboard shows at one point in its Rainbow Wave.
 - **Brightness is software-scaled.** The firmware reports one intensity level
   (`intensity_lvls = 1`), so the LampArray intensity channel is effectively
   on/off. The app scales the RGB values instead.
@@ -222,6 +223,11 @@ documented by
 [Luminous418/Gigabyte-Gaming-A16-Linux-Drivers](https://github.com/Luminous418/Gigabyte-Gaming-A16-Linux-Drivers)
 (MIT). This project is an independent implementation with a GUI, animations,
 and a slightly different CLI/config model.
+
+The rainbow colour stops mirror the rainbow/rainbow-wave gradient used by
+Corsair's CUE software, as implemented in
+[ckb-next](https://github.com/ckb-next/ckb-next) (GPL-2.0): red 0 %,
+yellow 17 %, green 33 %, cyan 50 %, blue 67 %, magenta 83 %, red 100 %.
 
 ## License
 

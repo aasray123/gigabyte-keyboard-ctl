@@ -3,9 +3,13 @@
 The keyboard has one RGB zone, so a spatial ("left to right across the keys")
 wave is not possible in hardware.  The ``wave`` effect instead sweeps through
 the 12-swatch palette in reading order -- top row left to right, then bottom
-row left to right -- with smooth perceptual interpolation.  The rainbow uses
-Oklch (constant lightness/chroma) instead of HSV, which removes the bright
-green/yellow spikes that make a naive RGB rainbow look jarring.
+row left to right -- with smooth perceptual interpolation.
+
+The ``rainbow`` effect mirrors the Corsair CUE/ckb-next rainbow gradient:
+full-saturation red, yellow, green, cyan, blue, magenta and back to red, with
+the stops at 0/17/33/50/67/83/100 % and linear interpolation between them.
+That is the same gradient Corsair keyboards use for their Rainbow and Rainbow
+Wave presets.
 
 Frames are sent as LampArray range updates at 25 fps.
 """
@@ -21,12 +25,19 @@ from .device import LampArray
 
 FPS = 25
 
-# Perceptual constants for the rainbow.  Constant lightness keeps the perceived
-# brightness steady through the whole hue cycle; the moderate chroma keeps it
-# colourful without the neon primary peaks of HSV.
-RAINBOW_LIGHTNESS = 0.74
-RAINBOW_CHROMA = 0.15
-RAINBOW_STEPS = 360
+# Corsair's rainbow gradient, as used by CUE / ckb-next:
+#   0 % red, 17 % yellow, 33 % green, 50 % cyan, 67 % blue, 83 % magenta,
+#   100 % red again.  Colours are interpolated in 8-bit sRGB, matching
+#   ckb-next's ckb_grad_color().
+CORSAIR_RAINBOW_STOPS = (
+    (0.0, (255, 0, 0)),
+    (17.0, (255, 255, 0)),
+    (33.0, (0, 255, 0)),
+    (50.0, (0, 255, 255)),
+    (67.0, (0, 0, 255)),
+    (83.0, (255, 0, 255)),
+    (100.0, (255, 0, 0)),
+)
 
 
 def period_seconds(speed: int) -> float:
@@ -74,35 +85,6 @@ def _oklab_to_linear(lab: tuple[float, float, float]) -> tuple[float, float, flo
     )
 
 
-def _in_gamut(rgb: tuple[float, float, float]) -> bool:
-    return all(-1e-6 <= channel <= 1 + 1e-6 for channel in rgb)
-
-
-def _oklch_to_linear(lightness: float, chroma: float, hue: float) -> tuple[float, float, float]:
-    """Oklch to linear sRGB, reducing chroma until the colour is in gamut."""
-    angle = 2 * math.pi * hue
-    a = chroma * math.cos(angle)
-    b = chroma * math.sin(angle)
-    rgb = _oklab_to_linear((lightness, a, b))
-    if _in_gamut(rgb):
-        return tuple(max(0.0, min(1.0, c)) for c in rgb)
-
-    low, high = 0.0, chroma
-    for _ in range(20):
-        mid = (low + high) / 2
-        rgb = _oklab_to_linear(
-            (lightness, mid * math.cos(angle), mid * math.sin(angle))
-        )
-        if _in_gamut(rgb):
-            low = mid
-        else:
-            high = mid
-    rgb = _oklab_to_linear(
-        (lightness, low * math.cos(angle), low * math.sin(angle))
-    )
-    return tuple(max(0.0, min(1.0, c)) for c in rgb)
-
-
 def _linear_to_rgb8(rgb: tuple[float, float, float]) -> tuple[int, int, int]:
     return tuple(round(_linear_to_srgb(channel) * 255) for channel in rgb)  # type: ignore[return-value]
 
@@ -113,14 +95,23 @@ def _mix(
     return tuple(a + (b - a) * amount for a, b in zip(first, second))  # type: ignore[return-value]
 
 
-def _build_rainbow() -> tuple[tuple[float, float, float], ...]:
-    return tuple(
-        _oklch_to_linear(RAINBOW_LIGHTNESS, RAINBOW_CHROMA, step / RAINBOW_STEPS)
-        for step in range(RAINBOW_STEPS)
-    )
+def _gradient_rgb(
+    stops: tuple[tuple[float, tuple[int, int, int]], ...], position: float
+) -> tuple[int, int, int]:
+    position = max(0.0, min(100.0, position))
+    for index in range(1, len(stops)):
+        end_position, end_colour = stops[index]
+        if position <= end_position:
+            start_position, start_colour = stops[index - 1]
+            span = end_position - start_position
+            amount = (position - start_position) / span if span else 0.0
+            return tuple(  # type: ignore[return-value]
+                round(start + (end - start) * amount)
+                for start, end in zip(start_colour, end_colour)
+            )
+    return stops[-1][1]
 
 
-_RAINBOW_LINEAR = _build_rainbow()
 _PALETTE_OKLAB = tuple(
     _linear_to_oklab(tuple(_srgb_to_linear(channel / 255) for channel in rgb))
     for rgb in PALETTE_RGB
@@ -131,16 +122,8 @@ _PALETTE_OKLAB = tuple(
 
 
 def rainbow_rgb(phase: float) -> tuple[int, int, int]:
-    """Smooth pastel rainbow with constant perceived lightness."""
-    position = (phase % 1.0) * RAINBOW_STEPS
-    index = int(position)
-    amount = position - index
-    linear = _mix(
-        _RAINBOW_LINEAR[index],
-        _RAINBOW_LINEAR[(index + 1) % RAINBOW_STEPS],
-        amount,
-    )
-    return _linear_to_rgb8(linear)
+    """Corsair-style full-saturation rainbow (red -> yellow -> ... -> red)."""
+    return _gradient_rgb(CORSAIR_RAINBOW_STOPS, (phase % 1.0) * 100.0)
 
 
 def palette_wave_rgb(phase: float) -> tuple[int, int, int]:
