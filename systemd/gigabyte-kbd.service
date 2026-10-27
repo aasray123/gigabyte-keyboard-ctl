@@ -1,0 +1,10 @@
+[Unit]
+Description=Restore GIGABYTE A16 keyboard backlight
+Documentation=https://github.com/aasray123/gigabyte-keyboard-ctl
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/gigabyte-kbd restore
+
+[Install]
+WantedBy=default.target

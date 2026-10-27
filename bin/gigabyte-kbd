@@ -11,6 +11,8 @@ _candidates = (
         os.environ.get("XDG_DATA_HOME", os.path.expanduser("~/.local/share")),
         "gigabyte-keyboard-ctl",
     ),
+    "/usr/local/lib/gigabyte-keyboard-ctl",
+    "/usr/lib/gigabyte-keyboard-ctl",
 )
 for _path in _candidates:
     if os.path.isdir(os.path.join(_path, "gigabyte_kbd")):
