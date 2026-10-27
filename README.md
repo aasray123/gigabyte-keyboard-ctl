@@ -38,20 +38,24 @@ left-to-right spatial effects are not possible on this hardware.
 
 ## Installation
 
-### Arch Linux / CachyOS (AUR)
+### Arch Linux / CachyOS (pacman package)
+
+The repository includes a `PKGBUILD`; build and install it with:
 
 ```bash
-yay -S gigabyte-keyboard-ctl
-# or: paru -S gigabyte-keyboard-ctl
-```
-
-Or build it manually:
-
-```bash
-git clone https://aur.archlinux.org/gigabyte-keyboard-ctl.git
+git clone https://github.com/aasray123/gigabyte-keyboard-ctl.git
 cd gigabyte-keyboard-ctl
 makepkg -si
 ```
+
+Or, if you already have the built package:
+
+```bash
+sudo pacman -U gigabyte-keyboard-ctl-1.0.1-1-any.pkg.tar.zst
+```
+
+AUR publication is pending; the included `PKGBUILD` and `.SRCINFO` are ready
+for it.
 
 The package installs:
 
@@ -185,7 +189,7 @@ across a full power-off. Windows re-sends the state through GiMate; on Linux
 nothing did, so the backlight stayed off.
 
 The login restore runs `gigabyte-kbd restore`, which re-applies the saved
-colour. With the AUR package, enable it once per user:
+colour. With the packaged install, enable it once per user:
 
 ```bash
 systemctl --user enable --now gigabyte-kbd.service
@@ -247,7 +251,7 @@ Install the udev rule, then log out and back in:
 
 ```bash
 sudo ./install.sh --system          # source checkout
-# or reinstall the AUR package, which ships the rule
+# or reinstall the package, which ships the rule
 ```
 
 **GUI does not start**

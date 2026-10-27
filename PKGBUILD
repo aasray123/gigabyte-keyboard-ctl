@@ -1,6 +1,6 @@
 # Maintainer: Aasray <aasray@gmail.com>
 pkgname=gigabyte-keyboard-ctl
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="RGB keyboard backlight control for the GIGABYTE GAMING A16 (CTH)"
 arch=('any')
@@ -8,12 +8,13 @@ url="https://github.com/aasray123/gigabyte-keyboard-ctl"
 license=('MIT')
 depends=('python')
 optdepends=('python-pyqt6: graphical control panel')
+makedepends=('git')
 install="$pkgname.install"
-source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('80d0c17c375fcd6138561856a0347633e2606a375d610c6d75bfc5fc42fdd530')
+source=("$pkgname::git+$url.git#tag=v$pkgver")
+sha256sums=('SKIP')
 
 package() {
-    cd "$srcdir/$pkgname-$pkgver"
+    cd "$srcdir/$pkgname"
 
     install -Dm755 bin/gigabyte-kbd "$pkgdir/usr/bin/gigabyte-kbd"
 
