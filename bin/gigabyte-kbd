@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""Launcher that works both from a git checkout and from a user install."""
+
+import os
+import sys
+
+_here = os.path.dirname(os.path.realpath(__file__))
+_candidates = (
+    os.path.abspath(os.path.join(_here, "..")),
+    os.path.join(
+        os.environ.get("XDG_DATA_HOME", os.path.expanduser("~/.local/share")),
+        "gigabyte-keyboard-ctl",
+    ),
+)
+for _path in _candidates:
+    if os.path.isdir(os.path.join(_path, "gigabyte_kbd")):
+        sys.path.insert(0, _path)
+        break
+
+from gigabyte_kbd.cli import main  # noqa: E402
+
+raise SystemExit(main())

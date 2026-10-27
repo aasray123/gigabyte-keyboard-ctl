@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=GIGABYTE A16 Keyboard Backlight
+Comment=Colour and brightness control for the GIGABYTE GAMING A16 keyboard
+Exec=gigabyte-kbd gui
+Icon=input-keyboard
+Terminal=false
+Categories=Settings;Utility;
+Keywords=rgb;backlight;keyboard;gigabyte;
+StartupNotify=true

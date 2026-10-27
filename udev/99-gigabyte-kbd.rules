@@ -1,0 +1,5 @@
+# GIGABYTE GAMING A16 (CTH) keyboard backlight (HID LampArray, VID 0414).
+# Lets the active desktop user talk to the keyboard's hidraw nodes without
+# root.  This is only needed when logind/uaccess is not already granting
+# access; check with:  ls -l /dev/hidraw*
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0414", TAG+="uaccess"
